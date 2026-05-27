@@ -1,0 +1,245 @@
+/* =========================================================
+   LAB4 main.css
+   - LAB3 베이스: wrapper, nav, form (signup/login)
+   - LAB4 신규: 검색바, 정렬 사이드바, 영화 카드 그리드, hover 줄거리
+   - 모든 컴포넌트 width 1020px 이내 + 가운데 정렬
+   ========================================================= */
+
+/* base */
+body {
+    font-family: 'Malgun Gothic', Arial, sans-serif;
+    background-color: #ffffff;
+    color: #222;
+    margin: 0;
+    padding: 20px;
+}
+
+/* 1020px 컨테이너 (LAB3에서 유지) */
+.wrapper {
+    max-width: 1020px;
+    margin: 0 auto;
+}
+
+/* ----- header ----- */
+.header-box {
+    max-width: 1020px;
+    overflow: hidden;
+}
+
+.header-text {
+    font-size: 24px;
+    text-align: left;
+    margin: 10px 0;
+}
+
+/* ----- nav ----- */
+.nav-menu {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #333;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+    padding: 4px 0;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+}
+
+.nav-menu a.active {
+    color: #cc0000;
+    border-top-color: #cc0000;
+    border-bottom-color: #cc0000;
+}
+
+/* =========================================================
+   LAB4 신규: 검색바
+   ========================================================= */
+.search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 30px;
+}
+
+#searchInput {
+    flex: 1;
+    height: 32px;
+    padding: 4px 10px;
+    border: 1px solid #aaa;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+#searchBtn {
+    width: 100px;
+    height: 32px;
+    background-color: #f0f0f0;
+    border: 1px solid #aaa;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#searchBtn:hover { background-color: #e0e0e0; }
+
+/* =========================================================
+   LAB4 신규: Movies 섹션 + 정렬 사이드바 + 영화 그리드
+   ========================================================= */
+.movie-section {
+    margin-bottom: 30px;
+}
+
+.movie-section h2 {
+    margin: 0 0 10px 0;
+    font-size: 22px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+/* 좌측 정렬 사이드바 + 우측 영화 그리드 */
+.movie-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+/* 좌측: 정렬 기준 */
+.sort-panel {
+    width: 180px;
+    flex-shrink: 0;
+    border: 1px solid #ccc;
+    padding: 15px;
+    height: fit-content;
+}
+
+.sort-panel h3 {
+    margin: 0 0 12px 0;
+    font-size: 15px;
+}
+
+.sort-panel label {
+    display: block;
+    margin: 8px 0;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* 우측: 영화 카드 그리드 */
+.movie-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 한 줄에 2개 */
+    gap: 20px;
+}
+
+/* 영화 카드 */
+.movie-card {
+    border: 1px solid #ddd;
+    background-color: #fff;
+    overflow: hidden;
+}
+
+/* 포스터 영역 (hover overlay 기준점) */
+.poster-wrap {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+}
+
+.poster-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* hover 시 영화 줄거리 오버레이 (요구사항 20pt) */
+.overview-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.95);
+    color: #222;
+    padding: 15px;
+    font-size: 13px;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.overview-overlay strong { display: block; margin-bottom: 8px; }
+
+/* hover 시 오버레이 표시 (CSS 백업) */
+.poster-wrap:hover .overview-overlay {
+    opacity: 1;
+}
+
+/* 영화 정보 (제목, 개봉일, 평점) */
+.movie-info {
+    padding: 10px;
+    text-align: center;
+}
+
+.movie-info .title {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.movie-info .release-date,
+.movie-info .vote-avg {
+    font-size: 13px;
+    color: #555;
+    margin: 2px 0;
+}
+
+/* infinite scroll loading 표시 */
+#loadingMsg {
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+    color: #888;
+}
+
+/* =========================================================
+   form (회원가입/로그인) - LAB3 그대로 유지
+   ========================================================= */
+.form-container {
+    width: 450px;
+    margin: 0 auto;
+    border: 2px solid black;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.form-group { margin-bottom: 15px; }
+.title-label { display: inline-block; width: 100px; font-size: 14px; }
+.radio-label { margin-right: 30px; font-size: 14px; }
+
+input[type="text"], input[type="date"], input[type="number"],
+input[type="password"], input[type="email"], select {
+    width: 250px;
+    height: 25px;
+    border: 1px solid #aaa;
+    padding: 2px 5px;
+}
+
+.btn-group { margin-top: 20px; }
+.btn-submit {
+    background-color: lightgreen; color: black; border: none;
+    padding: 10px 20px; font-size: 14px; cursor: pointer; border-radius: 5px;
+}
+.btn-cancel {
+    background-color: red; color: white; border: none;
+    padding: 10px 20px; font-size: 14px; cursor: pointer; border-radius: 5px;
+}

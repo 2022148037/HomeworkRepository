@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <!-- 외부 CSS 참조 -->
+    <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- 헤더 -->
+        <header class="header-box">
+            <h1 class="header-text">인프밍 영화 정보 사이트입니다.</h1>
+        </header>
+
+        <!-- 페이지 링킹 (메인 ↔ 로그인 ↔ 회원가입) -->
+        <nav class="nav-menu">
+            <a href="index.html">메인페이지</a>
+            <a href="login.html">로그인</a>
+            <a href="signup.html" class="active">회원가입</a>
+        </nav>
+
+        <!-- 회원가입 폼 (LAB2/LAB3 동일 구조 유지) -->
+        <div class="form-container">
+            <form>
+                <div class="form-group">
+                    <label class="title-label">이름 :</label>
+                    <input type="text" name="username" autofocus required>
+                </div>
+
+                <div class="form-group">
+                    <label class="title-label">생일 :</label>
+                    <input type="date" name="birthday">
+                </div>
+
+                <div class="form-group">
+                    <label class="title-label">성별 :</label>
+                    <input type="radio" id="male" name="gender" value="male">
+                    <label for="male" class="radio-label">남성</label>
+                    <input type="radio" id="female" name="gender" value="female">
+                    <label for="female" class="radio-label">여성</label>
+                </div>
+
+                <div class="form-group">
+                    <label class="title-label">학년 :</label>
+                    <input type="number" name="grade" min="1" max="4" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label class="title-label">아이디 :</label>
+                    <input type="text" name="userid" placeholder="아이디 입력" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="title-label">비밀번호 :</label>
+                    <input type="password" name="pwd" placeholder="비밀번호 입력" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="title-label">이메일 :</label>
+                    <input type="email" name="email" autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label class="title-label">보안 질문 :</label>
+                    <select name="sec_question">
+                        <option value="">질문을 선택하세요</option>
+                        <option value="movie">가장 좋아하는 영화는?</option>
+                        <option value="school">출신 초등학교는?</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="title-label">답변 :</label>
+                    <input type="text" name="sec_answer">
+                </div>
+
+                <div class="btn-group">
+                    <!-- Signup 버튼 클릭 시 login.html로 이동 -->
+                    <button type="button" class="btn-submit" onclick="location.href='login.html'">Signup</button>
+                    <button type="reset" class="btn-cancel">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>인프밍 영화 정보 사이트</title>
+    <!-- 외부 CSS 참조 -->
+    <link rel="stylesheet" type="text/css" href="main.css">
+</head>
+<body>
+    <div class="wrapper">
+        <!-- 헤더 -->
+        <header class="header-box">
+            <h1 class="header-text">인프밍 영화 정보 사이트입니다.</h1>
+        </header>
+
+        <!-- 페이지 링킹 (메인 ↔ 로그인 ↔ 회원가입) -->
+        <nav class="nav-menu">
+            <a href="index.html" class="active">메인페이지</a>
+            <a href="login.html">로그인</a>
+            <a href="signup.html">회원가입</a>
+        </nav>
+
+        <!-- 키워드 검색바 (요구사항: 키워드 검색 20pt) -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="키워드를 입력하세요.">
+            <button id="searchBtn">Filter results</button>
+        </div>
+
+        <!-- Movies 섹션 -->
+        <section class="movie-section">
+            <h2>Movies</h2>
+            <div class="movie-layout">
+
+                <!-- 좌측: 정렬 기준 (요구사항: Sort 4가지 20pt) -->
+                <aside class="sort-panel">
+                    <h3>정렬 기준</h3>
+                    <label><input type="radio" name="sort" value="rating_desc"> 평점 내림차순</label>
+                    <label><input type="radio" name="sort" value="rating_asc"> 평점 오름차순</label>
+                    <label><input type="radio" name="sort" value="date_desc"> 개봉 내림차순</label>
+                    <label><input type="radio" name="sort" value="date_asc"> 개봉 오름차순</label>
+                </aside>
+
+                <!-- 우측: 영화 카드 그리드 (JS가 동적으로 채움) -->
+                <div class="movie-grid" id="movieGrid"></div>
+            </div>
+            <!-- Infinite Scroll 트리거 -->
+            <div id="loadingMsg">⌛ 영화를 불러오는 중...</div>
+        </section>
+    </div>
+
+    <!-- =========================================================
+         JavaScript: Fetch API + Infinite Scroll + 검색 + 정렬 + hover
+         ========================================================= -->
+    <script>
+        // 전역 상태
+        let allMovies = [];        // product.json에서 받은 전체 영화 목록
+        let filteredMovies = [];   // 검색/정렬 후의 영화 목록
+        let renderedCount = 0;     // 현재까지 화면에 그린 영화 개수
+        const PAGE_SIZE = 4;       // Infinite Scroll 1회당 추가 로드 개수
+
+        const grid = document.getElementById('movieGrid');
+        const loadingMsg = document.getElementById('loadingMsg');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const sortRadios = document.querySelectorAll('input[name="sort"]');
+
+        // ---------------------------------------------------------
+        // 1. Fetch API로 product.json 불러오기 (요구사항 25pt)
+        // ---------------------------------------------------------
+        fetch('product.json')
+            .then(response => {
+                if (!response.ok) throw new Error('product.json 불러오기 실패');
+                return response.json();
+            })
+            .then(data => {
+                allMovies = data;
+                filteredMovies = data.slice(); // 초기엔 전체 표시
+                renderNextPage();              // 첫 페이지 렌더
+                ensureViewportFilled();        // 화면이 가득 차도록 자동 추가 로드
+            })
+            .catch(err => {
+                console.error(err);
+                loadingMsg.textContent = '⚠️ 영화 데이터를 불러올 수 없습니다.';
+            });
+
+        // ---------------------------------------------------------
+        // 2. 영화 카드 한 장을 만드는 함수
+        //    - 영화 정보 3개 이상 (제목, 개봉일, 평점) (요구사항 30pt 일부)
+        //    - 포스터 hover 시 줄거리 출력 (요구사항 20pt)
+        // ---------------------------------------------------------
+        function createMovieCard(movie) {
+            const card = document.createElement('div');
+            card.className = 'movie-card';
+
+            // 포스터 영역 + 줄거리 오버레이
+            const posterWrap = document.createElement('div');
+            posterWrap.className = 'poster-wrap';
+
+            const img = document.createElement('img');
+            img.src = movie.poster;
+            img.alt = movie.title;
+
+            const overlay = document.createElement('div');
+            overlay.className = 'overview-overlay';
+            overlay.innerHTML = '<strong>줄거리:</strong>' + (movie.overview || '줄거리 정보가 없습니다.');
+
+            // JS로도 hover 이벤트 처리 (요구사항: JS 사용)
+            posterWrap.addEventListener('mouseenter', () => {
+                overlay.style.opacity = '1';
+            });
+            posterWrap.addEventListener('mouseleave', () => {
+                overlay.style.opacity = '0';
+            });
+
+            posterWrap.appendChild(img);
+            posterWrap.appendChild(overlay);
+
+            // 영화 정보 (제목, 개봉일, 평점)
+            const info = document.createElement('div');
+            info.className = 'movie-info';
+            info.innerHTML =
+                '<div class="title">' + movie.title + '</div>' +
+                '<div class="release-date">📅 ' + movie.release_date + '</div>' +
+                '<div class="vote-avg">⭐ ' + movie.vote_average + '/10</div>';
+
+            card.appendChild(posterWrap);
+            card.appendChild(info);
+            return card;
+        }
+
+        // ---------------------------------------------------------
+        // 3. Infinite Scroll: 다음 PAGE_SIZE 만큼 추가 렌더 (요구사항 30pt)
+        // ---------------------------------------------------------
+        function renderNextPage() {
+            const end = Math.min(renderedCount + PAGE_SIZE, filteredMovies.length);
+            for (let i = renderedCount; i < end; i++) {
+                grid.appendChild(createMovieCard(filteredMovies[i]));
+            }
+            renderedCount = end;
+
+            // 모든 영화를 다 그렸으면 로딩 메시지 변경
+            if (renderedCount >= filteredMovies.length) {
+                if (filteredMovies.length === 0) {
+                    loadingMsg.textContent = '검색 결과가 없습니다.';
+                } else {
+                    loadingMsg.textContent = '— 모든 영화를 불러왔습니다 (' + filteredMovies.length + '개) —';
+                }
+            } else {
+                loadingMsg.textContent = '⌛ 스크롤하여 더 많은 영화 보기...';
+            }
+        }
+
+        // 스크롤 이벤트: 페이지 바닥에 가까워지면 다음 페이지 로드
+        window.addEventListener('scroll', () => {
+            const scrollPos = window.innerHeight + window.scrollY;
+            const docHeight = document.body.offsetHeight;
+            if (scrollPos >= docHeight - 100 && renderedCount < filteredMovies.length) {
+                renderNextPage();
+            }
+        });
+
+        // 초기 또는 검색/정렬 후, 콘텐츠가 viewport보다 짧으면 자동으로 다음 페이지 로드
+        // (큰 모니터에서도 Infinite Scroll 효과가 보이도록 보강)
+        function ensureViewportFilled() {
+            // 다음 페이지를 그릴 영화가 더 있고, 현재 페이지가 viewport보다 짧을 때
+            if (renderedCount < filteredMovies.length &&
+                document.documentElement.scrollHeight <= window.innerHeight + 50) {
+                renderNextPage();
+                // 다음 프레임에 다시 체크 (이미지 로딩으로 높이가 늦게 늘어남)
+                setTimeout(ensureViewportFilled, 100);
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 4. 필터링 (검색 + 정렬) 후 화면 다시 그리기
+        // ---------------------------------------------------------
+        function applyFilters() {
+            // (1) 키워드 검색
+            const keyword = searchInput.value.trim().toLowerCase();
+            let result = allMovies.filter(m => {
+                if (!keyword) return true;
+                return m.title.toLowerCase().includes(keyword)
+                    || (m.overview || '').toLowerCase().includes(keyword);
+            });
+
+            // (2) 정렬 (Sort 4가지)
+            const sortValue = document.querySelector('input[name="sort"]:checked');
+            if (sortValue) {
+                switch (sortValue.value) {
+                    case 'rating_desc':
+                        result.sort((a, b) => b.vote_average - a.vote_average);
+                        break;
+                    case 'rating_asc':
+                        result.sort((a, b) => a.vote_average - b.vote_average);
+                        break;
+                    case 'date_desc':
+                        result.sort((a, b) => b.release_date.localeCompare(a.release_date));
+                        break;
+                    case 'date_asc':
+                        result.sort((a, b) => a.release_date.localeCompare(b.release_date));
+                        break;
+                }
+            }
+
+            // (3) 화면 초기화 후 다시 렌더
+            filteredMovies = result;
+            renderedCount = 0;
+            grid.innerHTML = '';
+            renderNextPage();
+            ensureViewportFilled(); // 결과가 적어도 viewport 채우기
+        }
+
+        // 검색 버튼 클릭
+        searchBtn.addEventListener('click', applyFilters);
+        // Enter 키로도 검색
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+        // 정렬 라디오 변경 시 즉시 적용
+        sortRadios.forEach(r => r.addEventListener('change', applyFilters));
+    </script>
+</body>
+</html>
